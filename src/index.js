@@ -13,6 +13,7 @@ const io = socketio(server);
 
 const { generateMessage, generateLocationMessage } = require('./utils/messages');
 const { addUser, removeUser, getUser, getUsersInRoom } = require('./utils/users');
+const { addRoom, removeRoom, getRooms, roomExists } = require('./utils/rooms');
 
 // handlebars
 app.set('view engine', 'hbs');
@@ -25,8 +26,13 @@ app.use(express.static(path.join(__dirname, '../public')));
 io.on('connection', (socket) => {
 	console.log('New connection to web socket');
 
+	// home page
+	socket.emit('home', { rooms: getRooms() });
+
 	// join room
 	socket.on('join', ({ username, room }, callback) => {
+		if (!roomExists(room)) addRoom(room);
+
 		const { error, user } = addUser({ id: socket.id, username, room });
 
 		if (error) {
@@ -89,10 +95,14 @@ io.on('connection', (socket) => {
 		const { user, error } = removeUser(socket.id);
 
 		if (user) {
+			const usersInRoom = getUsersInRoom(user.room);
+
+			if (usersInRoom.length === 0) removeRoom(user.room);
+
 			io.to(user.room).emit('messageUpdated', generateMessage(`${user.username} has left the chat`));
 			io.to(user.room).emit('roomData', {
 				room: user.room,
-				users: getUsersInRoom(user.room),
+				users: usersInRoom,
 			});
 		}
 	});

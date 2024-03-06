@@ -104,7 +104,6 @@ socket.on('messageUpdated', (message) => {
 });
 
 socket.on('roomData', ({ room, users }) => {
-	console.log('users: ', users);
 	const html = Mustache.render(sidebarTemplate, {
 		room,
 		users,

@@ -1,5 +1,3 @@
-const _ = require('lodash');
-
 const users = [];
 
 const addUser = ({ id, username, room }) => {
@@ -29,11 +27,8 @@ const addUser = ({ id, username, room }) => {
 };
 
 const removeUser = (id) => {
-	// clone old
-	const clonedUsers = _.cloneDeep(users);
-
 	// find index
-	const existingIndex = clonedUsers.findIndex((x) => x.id === id);
+	const existingIndex = users.findIndex((x) => x.id === id);
 
 	// no match, error
 	if (existingIndex < 0) {
